@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { apiFetch } from './api.js'
 import AuthForm from './components/AuthForm.jsx'
 import HealthStatus from './components/HealthStatus.jsx'
+import Recommendation from './components/Recommendation.jsx'
 import SleepSessions from './components/SleepSessions.jsx'
 
 const STORAGE_KEY = 'winddown.auth'
@@ -16,6 +17,7 @@ function loadAuth() {
 
 export default function App() {
   const [auth, setAuth] = useState(loadAuth)
+  const [tab, setTab] = useState('bedtime')
 
   function handleAuth(next) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
@@ -49,7 +51,29 @@ export default function App() {
               Log out
             </button>
           </div>
-          <SleepSessions token={auth.token} />
+          <nav className="tabs" aria-label="Sections">
+            <button
+              type="button"
+              className="secondary"
+              aria-pressed={tab === 'bedtime'}
+              onClick={() => setTab('bedtime')}
+            >
+              Bedtime
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              aria-pressed={tab === 'sleep'}
+              onClick={() => setTab('sleep')}
+            >
+              Sleep log
+            </button>
+          </nav>
+          {tab === 'bedtime' ? (
+            <Recommendation token={auth.token} />
+          ) : (
+            <SleepSessions token={auth.token} />
+          )}
         </main>
       )}
     </div>

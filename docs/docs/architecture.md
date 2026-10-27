@@ -31,10 +31,24 @@ The OpenAPI schema is the source of truth (generated with drf-spectacular at `/a
 | POST | `/api/auth/logout/` | Log out (deletes the caller's token); 204 |
 | GET, POST | `/api/sleep/` | List (newest first) / create own sleep sessions. `end_time <= start_time` → 400 `{"end_time": ["Wake-up time must be after bedtime."]}` |
 | GET, PUT, PATCH, DELETE | `/api/sleep/{id}/` | One session (own only; another user's id → 404) |
-| GET | `/api/recommendation/?wake=07:00` | Bedtime recommendation |
+| GET | `/api/recommendation/?wake=07:00` | Bedtime recommendation (`wake` is 24-hour `HH:MM`; invalid/missing → 400). See below. |
 | GET | `/auth/google/start` | Start Google OAuth |
 | GET | `/auth/google/callback` | OAuth callback, stores tokens |
 | POST | `/api/sync/google/` | Import sleep from Google Health |
+
+### Recommendation response
+
+Logic lives in `backend/sleep/recommendation.py` (pure functions, no DB). Currently **cold start only**: population averages (90-min cycles, 15 min to fall asleep), 5 or 6 cycles, picking the fewest cycles that give at least 7 h of sleep. Bedtime wraps past midnight; `previous_day` is true when it falls on the day before the wake-up time. Personal mode (7+ nights) is not implemented yet.
+
+```json
+{
+  "wake": "07:00", "bedtime": "23:15", "previous_day": true,
+  "cycles": 5, "cycle_length_minutes": 90, "minutes_to_fall_asleep": 15, "sleep_minutes": 450,
+  "reason": "5 cycles of 90 min + 15 min to fall asleep",
+  "mode": "population", "uses_population_averages": true, "nights_logged": 0,
+  "message": "Based on population averages (90-min cycles, 15 min to fall asleep). Log 7 more nights to unlock personal recommendations."
+}
+```
 
 ## Data Model (draft)
 

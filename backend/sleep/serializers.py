@@ -30,3 +30,27 @@ class SleepSessionSerializer(serializers.ModelSerializer):
         if start is not None and end is not None and end <= start:
             raise serializers.ValidationError({"end_time": [END_BEFORE_START_ERROR]})
         return attrs
+
+
+class RecommendationQuerySerializer(serializers.Serializer):
+    wake = serializers.TimeField(
+        input_formats=["%H:%M"],
+        help_text="Target wake-up time, 24-hour HH:MM (e.g. 07:00).",
+    )
+
+
+class RecommendationSerializer(serializers.Serializer):
+    wake = serializers.TimeField(format="%H:%M")
+    bedtime = serializers.TimeField(format="%H:%M")
+    previous_day = serializers.BooleanField(
+        help_text="True when the bedtime is on the day before the wake-up time."
+    )
+    cycles = serializers.IntegerField()
+    cycle_length_minutes = serializers.IntegerField()
+    minutes_to_fall_asleep = serializers.IntegerField()
+    sleep_minutes = serializers.IntegerField()
+    reason = serializers.CharField()
+    mode = serializers.ChoiceField(choices=["population"])
+    uses_population_averages = serializers.BooleanField()
+    nights_logged = serializers.IntegerField()
+    message = serializers.CharField()
