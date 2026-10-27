@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "core",
     "accounts",
+    "sleep",
 ]
 
 MIDDLEWARE = [

@@ -29,8 +29,8 @@ The OpenAPI schema is the source of truth (generated with drf-spectacular at `/a
 | POST | `/api/auth/register/` | Sign up with `email` + `password`; returns `{token, email}` |
 | POST | `/api/auth/login/` | Log in with `email` + `password`; returns `{token, email}` |
 | POST | `/api/auth/logout/` | Log out (deletes the caller's token); 204 |
-| GET, POST | `/api/sleep/` | List / create own sleep sessions |
-| GET, PUT, DELETE | `/api/sleep/{id}/` | One session (own only) |
+| GET, POST | `/api/sleep/` | List (newest first) / create own sleep sessions. `end_time <= start_time` → 400 `{"end_time": ["Wake-up time must be after bedtime."]}` |
+| GET, PUT, PATCH, DELETE | `/api/sleep/{id}/` | One session (own only; another user's id → 404) |
 | GET | `/api/recommendation/?wake=07:00` | Bedtime recommendation |
 | GET | `/auth/google/start` | Start Google OAuth |
 | GET | `/auth/google/callback` | OAuth callback, stores tokens |
@@ -39,7 +39,7 @@ The OpenAPI schema is the source of truth (generated with drf-spectacular at `/a
 ## Data Model (draft)
 
 - **User** — Django built-in user
-- **SleepSession** — user, start_time, end_time, minutes_to_fall_asleep, source (`manual` / `google`), external_id (unique per user, prevents duplicates)
+- **SleepSession** — user, start_time, end_time, minutes_to_fall_asleep (nullable), source (`manual` / `google`), external_id (nullable; unique per user when set, prevents duplicates). DB check constraint: end_time > start_time. API also returns read-only `duration_minutes`; `source` is read-only and always `manual` for API-created sessions.
 - **SleepStage** — session, start_time, end_time, type (`LIGHT` / `DEEP` / `REM` / `AWAKE`)
 - **GoogleToken** — user, access_token, refresh_token, expires_at (encrypted, never logged)
 

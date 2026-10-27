@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { apiFetch } from './api.js'
 import AuthForm from './components/AuthForm.jsx'
 import HealthStatus from './components/HealthStatus.jsx'
+import SleepSessions from './components/SleepSessions.jsx'
 
 const STORAGE_KEY = 'winddown.auth'
 
@@ -48,6 +49,7 @@ export default function App() {
               Log out
             </button>
           </div>
+          <SleepSessions token={auth.token} />
         </main>
       )}
     </div>
