@@ -1,2 +1,21 @@
 # Environment variables
 .env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.sqlite3
+.coverage
+htmlcov/
+
+# Node / frontend
+node_modules/
+dist/
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db

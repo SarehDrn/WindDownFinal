@@ -1,0 +1,61 @@
+# Local development stack: `docker compose up` from the repo root.
+#   App:      http://localhost:5173  (Vite, proxies /api to the backend)
+#   API:      http://localhost:8000
+#   Postgres: localhost:5433 (also used by the test runner, which starts only `db`)
+#
+# Every value below is a safe dev default. Nothing here reads backend/.env.
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: winddown
+      POSTGRES_PASSWORD: winddown
+      POSTGRES_DB: winddown
+    ports:
+      - "5433:5432"
+    volumes:
+      - winddown_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U winddown -d winddown"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    build: ./backend
+    environment:
+      DJANGO_NO_DOTENV: "1"
+      DEBUG: "1"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-dev-only-insecure-docker-key}
+      DATABASE_URL: postgres://winddown:winddown@db:5432/winddown
+      ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/', timeout=3)"
+      interval: 3s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_PROXY: http://backend:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  winddown_pgdata:

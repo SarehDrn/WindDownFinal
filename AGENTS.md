@@ -22,6 +22,7 @@ Planned layout (created by the first issue, the project scaffold):
 ```
 backend/    Django + Django REST Framework API
 frontend/   React (Vite) web app
+scripts/    One-command test runner (scripts/test.mjs, run via `npm test`)
 docs/       Spec, architecture, agent team, process
 .claude/agents/  Subagent definitions (pm, engineer, qa, ops)
 ```
@@ -29,15 +30,27 @@ docs/       Spec, architecture, agent team, process
 ## Commands
 
 ```bash
-# Backend
-cd backend && python manage.py runserver      # run API on :8000
-cd backend && pytest                          # backend tests
+# Whole app (Postgres + Django API + Vite app) in Docker
+docker compose up --build                             # app :5173, API :8000, Postgres :5433
+docker compose exec backend python manage.py load_demo   # demo user + 30 nights
+docker compose down                                   # stop (keeps the DB volume)
 
-# Frontend
-cd frontend && npm run dev                    # run app on :5173
-cd frontend && npm test                       # frontend tests
+# Without Docker for the app (Postgres still via: docker compose up -d --wait db)
+cd backend && .venv/Scripts/python manage.py runserver   # API on :8000 (macOS/Linux: .venv/bin/python)
+cd backend && .venv/Scripts/python manage.py load_demo   # demo data
+cd frontend && npm run dev                               # app on :5173, proxies /api to :8000
 ```
-(Docker Compose and one-command run will be added in Module 3; update this section then.)
+
+```bash
+# Tests: one command (starts the Postgres container, runs backend unit +
+# integration tests, then frontend tests; non-zero exit on any failure)
+npm test
+
+npm run test:backend:unit          # pytest -m "not integration"
+npm run test:backend:integration   # pytest -m integration (real Postgres)
+npm run test:frontend              # vitest run
+```
+Backend tests never read `backend/.env`; the runner sets `DJANGO_NO_DOTENV=1`, a dummy `DJANGO_SECRET_KEY` and `DATABASE_URL` (override with `TEST_DATABASE_URL`). Mark full API/DB flow tests with `@pytest.mark.integration`.
 
 ## Rules
 
