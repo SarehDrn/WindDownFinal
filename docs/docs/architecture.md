@@ -57,6 +57,10 @@ Logic lives in `backend/sleep/recommendation.py` (pure functions, no DB). Curren
 - **SleepStage** — session, start_time, end_time, type (`LIGHT` / `DEEP` / `REM` / `AWAKE`)
 - **GoogleToken** — user, access_token, refresh_token, expires_at (encrypted, never logged)
 
+## Demo Data
+
+`python manage.py load_demo` creates (or refreshes) `demo@winddown.app` (password `winddown-demo`, override with `--password` or `DEMO_USER_PASSWORD`) with 30 nights of deterministic sample sleep ending today. Nights use `external_id = demo-YYYY-MM-DD`, so re-running updates instead of duplicating.
+
 ## Configuration
 
 All secrets come from environment variables (`.env` locally, platform settings in deployment):
