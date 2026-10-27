@@ -19,13 +19,16 @@
 
 ## API Contract (draft)
 
-The OpenAPI schema is the source of truth (generated with drf-spectacular at `/api/schema/`).
+The OpenAPI schema is the source of truth (generated with drf-spectacular at `/api/schema/`, Swagger UI at `/api/docs/`).
+
+**Auth:** DRF token auth. Send `Authorization: Token <token>` on every request except health, register and login. Missing or invalid token → `401`. Another user's object → `404`.
 
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/api/health/` | Health check |
-| POST | `/api/auth/register/` | Sign up |
-| POST | `/api/auth/login/` | Log in |
+| POST | `/api/auth/register/` | Sign up with `email` + `password`; returns `{token, email}` |
+| POST | `/api/auth/login/` | Log in with `email` + `password`; returns `{token, email}` |
+| POST | `/api/auth/logout/` | Log out (deletes the caller's token); 204 |
 | GET, POST | `/api/sleep/` | List / create own sleep sessions |
 | GET, PUT, DELETE | `/api/sleep/{id}/` | One session (own only) |
 | GET | `/api/recommendation/?wake=07:00` | Bedtime recommendation |
