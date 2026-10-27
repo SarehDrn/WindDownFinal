@@ -42,9 +42,29 @@ Agent team and process
 Task tracker
 Running Locally
 
-Requirements: Python 3.14, Node 24, Docker.
+**With Docker (one command).** Requires Docker with Compose. From the repo root:
 
-1. Start PostgreSQL: `docker compose up -d --wait db` (listens on localhost:5433).
+```bash
+docker compose up --build        # add -d to run in the background
+```
+
+- App: http://localhost:5173 (Vite dev server; proxies `/api` to the backend)
+- API: http://localhost:8000 (health at `/api/health/`, OpenAPI schema at `/api/schema/`, Swagger UI at `/api/docs/`)
+- PostgreSQL: localhost:5433 (user / password / db: `winddown`)
+
+The backend waits for Postgres to be healthy and runs migrations on start. All config comes from safe dev defaults in `docker-compose.yml` (it never reads `backend/.env`). Code changes need `docker compose up --build` to show up in the containers.
+
+Load demo data (user `demo@winddown.app`, password `winddown-demo`, 30 nights of sleep; safe to run again):
+
+```bash
+docker compose exec backend python manage.py load_demo
+```
+
+Stop with `docker compose down` (add `-v` only if you want to wipe the database volume).
+
+**Without Docker for the app.** Requires Python 3.14 and Node 24. Postgres still runs in Docker:
+
+1. Start PostgreSQL: `docker compose up -d --wait db`
 2. Backend (API on http://localhost:8000):
    ```bash
    cd backend
@@ -52,16 +72,15 @@ Requirements: Python 3.14, Node 24, Docker.
    .venv/Scripts/python -m pip install -r requirements.txt   # macOS/Linux: .venv/bin/python
    cp .env.example .env                                       # then edit values
    .venv/Scripts/python manage.py migrate
+   .venv/Scripts/python manage.py load_demo                   # optional demo data
    .venv/Scripts/python manage.py runserver
    ```
-3. Frontend (app on http://localhost:5173, proxies /api to :8000):
+3. Frontend (app on http://localhost:5173; proxies `/api` to `VITE_API_PROXY`, default http://localhost:8000):
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
-
-API schema: http://localhost:8000/api/schema/ (Swagger UI at /api/docs/).
 
 Tests
 

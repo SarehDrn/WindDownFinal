@@ -14,7 +14,7 @@
 |---|---|---|
 | Frontend | React + Vite | Screens: login, log sleep, recommendation, history, settings. Mobile-first layout. |
 | Backend | Django + DRF | Auth, sleep sessions, recommendation, Google Health import |
-| Database | PostgreSQL (SQLite locally until Docker is added) | Users, sleep sessions, OAuth tokens |
+| Database | PostgreSQL 17 (Docker Compose `db` service locally, port 5433) | Users, sleep sessions, auth tokens, OAuth tokens |
 | External | Google Health API v4 | Read sleep sessions and stages (scope: sleep read-only) |
 
 ## API Contract (draft)
@@ -61,14 +61,17 @@ Logic lives in `backend/sleep/recommendation.py` (pure functions, no DB). Curren
 
 `python manage.py load_demo` creates (or refreshes) `demo@winddown.app` (password `winddown-demo`, override with `--password` or `DEMO_USER_PASSWORD`) with 30 nights of deterministic sample sleep ending today. Nights use `external_id = demo-YYYY-MM-DD`, so re-running updates instead of duplicating.
 
+## Local Stack (Docker Compose)
+
+`docker compose up` starts `db` (postgres:17, healthcheck, named volume `winddown_pgdata`), `backend` (waits for a healthy db, runs migrations, serves :8000) and `frontend` (Vite dev server on :5173; `/api` proxied to `VITE_API_PROXY`, `http://backend:8000` in compose, `http://localhost:8000` by default). Compose sets dev-only config via `environment:` and does not read `backend/.env`.
+
 ## Configuration
 
-All secrets come from environment variables (`.env` locally, platform settings in deployment):
-`DJANGO_SECRET_KEY`, `DATABASE_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`.
+All secrets come from environment variables (`backend/.env` locally, loaded if present and never committed; platform settings in deployment). See `backend/.env.example`:
+`DJANGO_SECRET_KEY`, `DATABASE_URL`, `DEBUG`, `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`; later `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`. `DJANGO_NO_DOTENV=1` skips loading `backend/.env` (used by tests and compose).
 
 ## Later (Modules 3–4)
 
-- Docker Compose: frontend, backend, Postgres
 - Deployment on Render with staging and production
 - OpenTelemetry → Grafana (metrics, traces, logs)
 - Alert on failed recommendations / sync errors → on-call agent

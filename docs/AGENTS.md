@@ -29,15 +29,16 @@ docs/       Spec, architecture, agent team, process
 ## Commands
 
 ```bash
-# Backend
-cd backend && python manage.py runserver      # run API on :8000
-cd backend && pytest                          # backend tests
+# Whole app (Postgres + Django API + Vite app) in Docker
+docker compose up --build                             # app :5173, API :8000, Postgres :5433
+docker compose exec backend python manage.py load_demo   # demo user + 30 nights
+docker compose down                                   # stop (keeps the DB volume)
 
-# Frontend
-cd frontend && npm run dev                    # run app on :5173
-cd frontend && npm test                       # frontend tests
+# Without Docker for the app (Postgres still via: docker compose up -d --wait db)
+cd backend && .venv/Scripts/python manage.py runserver   # API on :8000 (macOS/Linux: .venv/bin/python)
+cd backend && .venv/Scripts/python manage.py load_demo   # demo data
+cd frontend && npm run dev                               # app on :5173, proxies /api to :8000
 ```
-(Docker Compose and one-command run will be added in Module 3; update this section then.)
 
 ## Rules
 
