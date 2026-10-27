@@ -84,7 +84,35 @@ Stop with `docker compose down` (add `-v` only if you want to wipe the database 
 
 Tests
 
-Coming soon
+**One command runs everything** (needs Docker, Python 3.14, Node 24). From the repo root:
+
+```bash
+npm test
+```
+
+This runs `scripts/test.mjs`, which:
+1. starts only the Postgres container (`docker compose up -d --wait db`, localhost:5433),
+2. creates `backend/.venv` and installs `backend/requirements.txt` if the venv is missing (and runs `npm ci` in `frontend/` if `node_modules` is missing),
+3. runs backend unit tests (`pytest -m "not integration"`), then backend integration tests (`pytest -m integration`, full API flows against the real Postgres test database),
+4. runs the frontend tests (`vitest run`: component tests plus an app-level integration test with `fetch` mocked).
+
+It exits non-zero if any suite fails. The backend tests set their own environment (`DJANGO_NO_DOTENV=1`, a dummy `DJANGO_SECRET_KEY`, `DATABASE_URL=postgres://winddown:winddown@localhost:5433/winddown`, override with `TEST_DATABASE_URL`), so they never read `backend/.env`. pytest-django creates and drops a separate `test_winddown` database.
+
+Run one suite at a time:
+
+```bash
+npm run test:backend:unit          # backend unit tests only
+npm run test:backend:integration   # backend integration tests only
+npm run test:frontend              # frontend tests only
+```
+
+Or directly (Postgres must be running and the env vars above set):
+
+```bash
+cd backend && .venv/Scripts/python -m pytest -m "not integration"   # macOS/Linux: .venv/bin/python
+cd backend && .venv/Scripts/python -m pytest -m integration
+cd frontend && npm test
+```
 
 Deployment
 

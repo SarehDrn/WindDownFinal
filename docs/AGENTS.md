@@ -22,6 +22,7 @@ Planned layout (created by the first issue, the project scaffold):
 ```
 backend/    Django + Django REST Framework API
 frontend/   React (Vite) web app
+scripts/    One-command test runner (scripts/test.mjs, run via `npm test`)
 docs/       Spec, architecture, agent team, process
 .claude/agents/  Subagent definitions (pm, engineer, qa, ops)
 ```
@@ -39,6 +40,17 @@ cd backend && .venv/Scripts/python manage.py runserver   # API on :8000 (macOS/L
 cd backend && .venv/Scripts/python manage.py load_demo   # demo data
 cd frontend && npm run dev                               # app on :5173, proxies /api to :8000
 ```
+
+```bash
+# Tests: one command (starts the Postgres container, runs backend unit +
+# integration tests, then frontend tests; non-zero exit on any failure)
+npm test
+
+npm run test:backend:unit          # pytest -m "not integration"
+npm run test:backend:integration   # pytest -m integration (real Postgres)
+npm run test:frontend              # vitest run
+```
+Backend tests never read `backend/.env`; the runner sets `DJANGO_NO_DOTENV=1`, a dummy `DJANGO_SECRET_KEY` and `DATABASE_URL` (override with `TEST_DATABASE_URL`). Mark full API/DB flow tests with `@pytest.mark.integration`.
 
 ## Rules
 

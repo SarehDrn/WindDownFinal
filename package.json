@@ -1,0 +1,11 @@
+{
+  "name": "winddown",
+  "private": true,
+  "description": "Wind Down: sleep-cycle bedtime recommender (root scripts only; see backend/ and frontend/).",
+  "scripts": {
+    "test": "node scripts/test.mjs",
+    "test:backend:unit": "node scripts/test.mjs backend-unit",
+    "test:backend:integration": "node scripts/test.mjs backend-integration",
+    "test:frontend": "node scripts/test.mjs frontend"
+  }
+}
