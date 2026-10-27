@@ -1,4 +1,7 @@
 # WindDownFinal
+
+[![CI](https://github.com/SarehDrn/WindDownFinal/actions/workflows/ci.yml/badge.svg)](https://github.com/SarehDrn/WindDownFinal/actions/workflows/ci.yml)
+
 Wind Down
 
 Wind Down tells you when to go to bed so you wake up feeling rested.
@@ -113,6 +116,13 @@ cd backend && .venv/Scripts/python -m pytest -m "not integration"   # macOS/Linu
 cd backend && .venv/Scripts/python -m pytest -m integration
 cd frontend && npm test
 ```
+
+**Continuous Integration.** GitHub Actions (`.github/workflows/ci.yml`) runs on every push to any branch and on every pull request:
+- `backend`: Python 3.14 with a `postgres:17` service container; runs the unit tests (`pytest -m "not integration"`), then the integration tests (`pytest -m integration`). It uses test-only env values (`DJANGO_NO_DOTENV=1`, a dummy `DJANGO_SECRET_KEY`, `DEBUG=0`, `DATABASE_URL=postgres://winddown:winddown@localhost:5432/winddown`); no repository secrets are needed.
+- `frontend`: Node 24, `npm ci`, then `npm test` (`vitest run`).
+- `docker-compose`: checks `docker-compose.yml` and that the backend and frontend images build (`docker compose build`).
+
+A newer push to the same branch or PR cancels the older run. The badge at the top of this README shows the latest status.
 
 Deployment
 
