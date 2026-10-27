@@ -42,7 +42,26 @@ Agent team and process
 Task tracker
 Running Locally
 
-Coming soon
+Requirements: Python 3.14, Node 24, Docker.
+
+1. Start PostgreSQL: `docker compose up -d --wait db` (listens on localhost:5433).
+2. Backend (API on http://localhost:8000):
+   ```bash
+   cd backend
+   python -m venv .venv
+   .venv/Scripts/python -m pip install -r requirements.txt   # macOS/Linux: .venv/bin/python
+   cp .env.example .env                                       # then edit values
+   .venv/Scripts/python manage.py migrate
+   .venv/Scripts/python manage.py runserver
+   ```
+3. Frontend (app on http://localhost:5173, proxies /api to :8000):
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+API schema: http://localhost:8000/api/schema/ (Swagger UI at /api/docs/).
 
 Tests
 
